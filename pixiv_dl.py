@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from argparse import ArgumentParser
 from json import loads
 from time import sleep
 
@@ -100,9 +101,20 @@ class Pixiv:
             self.history.save()
 
 
+def args_parse():
+    parser = ArgumentParser(description='pixiv imageboard downloader')
+    parser.add_argument('--work_dir', type=str, default=WORK_DIR)
+    parser.add_argument('--dl_all', required=False, action='store_true')
+    parser.add_argument('post_id', type=str)
+    args = parser.parse_args()
+    print(args)
+    return args
+
+
 def main():
-    pixiv = Pixiv(WORK_DIR)
-    pixiv.download_posts('77926929')  # nori_tamago
+    args = args_parse()
+    pixiv = Pixiv(args.work_dir)
+    pixiv.download_posts(args.post_id, args.dl_all)
 
 
 if __name__ == '__main__':
