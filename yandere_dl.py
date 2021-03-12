@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser
 from functools import reduce
+from os import listdir
 from os.path import split
+from re import findall, sub
 from subprocess import getstatusoutput
 from time import sleep
 from urllib import parse
@@ -86,12 +88,12 @@ class Tagger(Yanderer):
         print('Tags[%10d] Total tags found: %d' % (0, len(tags)))
         return list(tags.keys())
 
-    def update_tags(self, fast_update=True):
+    def update_tags(self, update_all=False):
         for tag, tag_type in self.TAGS.items():
             print('Tags[%10d] Processing tags: %s' % (0, int(tag_type['id'])))
             self.tag_type = tag_type
-            tags = self._get_tags(5 if fast_update else None)
-            if fast_update:
+            tags = self._get_tags(5 if not update_all else None)
+            if not update_all:
                 tag_type['tags'] = set(tags).union(tag_type['tags'])
             else:
                 tag_type['tags'] = set(tags)
@@ -242,9 +244,9 @@ class Pooler(Yanderer):
         pools_ = {pool_id: pools_[str(pool_id)] for pool_id in sorted(map(int, pools_.keys()), reverse=True)}
         self.history.set_category('pools', pools_)
 
-    def load_info(self, fast_load=True):
+    def load_info(self, load_all=False):
         print('Pool[%10d] Grabbing pools' % 0)
-        if fast_load: self.limit_pages = 5
+        if not load_all: self.limit_pages = 5
         pools = self._collect_items(self.POOL_PAGE)
         print('Pool[%10d] Total pools found: %d' % (0, len(pools)))
         self._merge_history(pools)
@@ -348,25 +350,11 @@ def rename_pools(work_dir):
             rename(join(work_dir, pool), join(work_dir, '%s — %s' % pp[0]))
 
 
-def cut_posts(work_dir):
-    tagger = Tagger()
-    task = {}
-    for dir_ in listdir(work_dir):
-        if dir_ == 'back.json': continue
-        dir_path = join(work_dir, dir_)
-        for file_ in listdir(dir_path):
-            if file_ == '.nomedia': continue
-            idx, post, tags, ext = findall(r'([-~^&\w]*?)\s(\d{1,7})\s(.+)\.(\w{3,4})', file_)[0]
-            task[join(dir_path, file_)] = join(dir_path, '%s %s %s.%s' % (idx, post, tagger.filter_tags(tags), ext))
-    with open(join(work_dir, 'yandere.rename.log'), 'w', encoding='utf-8') as f:
-        for k, v in task.items(): f.write('rename "%s" "%s"\n' % (k, v))
-    for from_, to_ in task.items(): rename(from_, to_)
-
-
 def args_parse():
     parser = ArgumentParser(description='yande.re imageboard downloader')
     parser.add_argument('--update_tags', required=False, action='store_true')
     parser.add_argument('--update_pools', required=False, action='store_true')
+    parser.add_argument('--update_all', required=False, action='store_true')
     parser.add_argument('--rename_pools', required=False, action='store_true')
     parser.add_argument('--rename_posts', required=False, action='store_true')
     parser.add_argument('--work_dir', type=str, default=WORK_DIR)
@@ -384,11 +372,11 @@ def main():
 
     if args.update_tags:
         tagger = Tagger()
-        tagger.update_tags()
+        tagger.update_tags(args.update_all)
 
     if args.update_pools:
         pooler = Pooler(args.work_dir)
-        pooler.load_info()
+        pooler.load_info(args.update_all)
 
     if args.pool_id:
         pooler = Pooler(args.work_dir)
@@ -414,6 +402,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # rename_pools('D:\\_downloads_\\pl\\___\\')
-    # cut_posts('D:\\_downloads_\\pl')
     main()

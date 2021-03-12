@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime as dt
 from datetime import timedelta as td
-from re import match
+from re import findall, match
 
 from requests import request
 from telethon import TelegramClient

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser
+from re import findall
 from urllib import parse
 
 from bs4 import BeautifulSoup as bs

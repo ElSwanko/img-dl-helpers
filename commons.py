@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from json import load, dump
-from os import remove, rename, mkdir, listdir
+from os import remove, rename, mkdir
 from os.path import join, isfile, isdir, dirname, abspath
-from re import sub, findall
+from random import getrandbits
 
 BASE_DIR = dirname(abspath(__file__))
 WORK_DIR = 'D:\\_downloads_'
@@ -47,7 +47,7 @@ class History:
             with open(self.file_path, 'r') as f: self.data = load(f)
 
     def save(self, indent=None):
-        file_path_ = join(self.work_dir, 'tmp.json')
+        file_path_ = join(self.work_dir, 'tmp_%s.json' % getrandbits(16))
         with open(file_path_, 'w') as f: dump(self.data, f, indent=indent)
         remove(self.file_path)
         rename(file_path_, self.file_path)
@@ -66,29 +66,3 @@ class History:
 
     def set_item(self, category, item, data):
         self.get_category(category)[item] = data
-
-
-def _fast_rename(work_dir):
-    for file in listdir(work_dir):
-        file_ = sub(r'\b[^a-zA-Z0-9\s\-~_.,()\[\]]*', '', file)
-        if file_ != file: rename(join(work_dir, file), join(work_dir, file_))
-        # rename(join(work_dir, file), join(work_dir, file.replace('／', '_').replace('：', '')))
-
-def _fast_strip(work_dir):
-    for file in listdir(work_dir):
-        file, ext = findall(r'(.*)\.(\w{3,4})', file)[0]
-        file_ = file.strip()
-        if file_ != file: rename(join(work_dir, '%s.%s' % (file, ext)), join(work_dir, '%s.%s' % (file_, ext)))
-
-
-def _rename_dirs():
-    work_dir = 'D:\\_downloads_\\pl\\#'
-    for dir_ in listdir(work_dir):
-        dir__ = join(work_dir, dir_)
-        if isdir(dir__):
-            # print('rename %s -> %s' % (dir__, join(work_dir, sub(r'(.*)(?:\s+[-—]\s?)(.*)', r'\2', dir_))))
-            rename(dir__, join(work_dir, sub(r'(.*)(?:\s+[-—]\s?)(.*)', r'\2', dir_)))
-
-if __name__ == '__main__':
-    # _rename_dirs()
-    pass

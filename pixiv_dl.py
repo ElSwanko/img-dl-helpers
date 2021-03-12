@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser
 from json import loads
+from re import sub
 from time import sleep
 
 from bs4 import BeautifulSoup as bs
@@ -114,7 +115,8 @@ def args_parse():
 def main():
     args = args_parse()
     pixiv = Pixiv(args.work_dir)
-    pixiv.download_posts(args.post_id, args.dl_all)
+    for post_id in args.post_id.split(','):
+        pixiv.download_posts(post_id, args.dl_all)
 
 
 if __name__ == '__main__':
