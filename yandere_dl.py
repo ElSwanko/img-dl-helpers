@@ -17,7 +17,7 @@ from commons import *
 class Yanderer:
     SLEEP_TIME = 0.1
 
-    def __init__(self, work_dir=BASE_DIR, history=None):
+    def __init__(self, work_dir=WORK_DIR, history=None):
         self.work_dir = work_dir
         self.history = history if history else History(file_name='yandere.json')
         self.limit_pages = None
@@ -68,7 +68,7 @@ class Tagger(Yanderer):
         'general': {'id': '0', 'class': 'tag-type-general', 'tags': set()}
     }
 
-    def __init__(self, work_dir=BASE_DIR, history=None):
+    def __init__(self, work_dir=WORK_DIR, history=None):
         super().__init__(work_dir, history)
         self.tag_type = self.TAGS['artist']
         for tag in self.TAGS.keys():
@@ -113,7 +113,7 @@ class Pooler(Yanderer):
     POOL_URL = 'https://yande.re/pool/%s/%s'
     POOL_PAGE = 'https://yande.re/pool?limit=200&page=%d'
 
-    def __init__(self, work_dir=BASE_DIR, history=None, tagger=None):
+    def __init__(self, work_dir=WORK_DIR, history=None, tagger=None):
         super().__init__(work_dir, history)
         self.tagger = tagger if tagger else Tagger()
         self.pool_name = ''
@@ -271,7 +271,7 @@ class Pooler(Yanderer):
 class Poster(Yanderer):
     POST_URL = 'https://yande.re/post?limit=200&page=%d'
 
-    def __init__(self, work_dir=BASE_DIR, history=None, tagger=None):
+    def __init__(self, work_dir=WORK_DIR, history=None, tagger=None):
         super().__init__(work_dir, history)
         self.tagger = tagger if tagger else Tagger()
         self.post_dir = work_dir

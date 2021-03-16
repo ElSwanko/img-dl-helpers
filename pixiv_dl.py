@@ -23,7 +23,7 @@ class Pixiv:
     UGOIRA_DL_URL = 'http://ugoira.dataprocessingclub.org/convert'
     UGOIRA_PARAMS = {'url': POST_URL, 'format': 'gif'}
 
-    def __init__(self, work_dir, history=None):
+    def __init__(self, work_dir=WORK_DIR, history=None):
         self.work_dir = work_dir
         self.history = history if history else History(file_name='pixiv.json')
         with open(join(BASE_DIR, 'cookies', 'pixiv_.json'), 'r') as fd:
@@ -42,7 +42,7 @@ class Pixiv:
         return meta
 
     @staticmethod
-    def _save_met(meta, post_id):
+    def _save_meta(meta, post_id):
         with open(join(BASE_DIR, '%d.json' % post_id), 'w', encoding='utf-8') as fd:
             dump(meta, fd, ensure_ascii=False, indent=2)
 
