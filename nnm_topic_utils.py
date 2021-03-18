@@ -216,7 +216,7 @@ class NNMTopicUtils:
                 'alive_size': self.sizer.format_size(alive_bytes),
                 'total_size': self.sizer.format_size(total_bytes), 'forums': c}
 
-    def _flatten_category(self, c_id, limit=250):
+    def _flatten_category(self, c_id, limit=None):
         forums = {}
         category = self.history.get_item('struct', c_id)
         for c_f in category['forums'].values():
@@ -273,7 +273,7 @@ class NNMTopicUtils:
             f.writelines([l + '\n' for l in lines])
         return lines
 
-    def update_category(self, c_id, u_id=1):
+    def update_category(self, c_id, u_id=0):
         if not self._select_user(u_id): return
         c = self._get_category(c_id)
         self.history.set_item('struct', c_id, c)
@@ -296,6 +296,7 @@ def args_parse():
     parser.add_argument('--print_category', required=False, action='store_true')
     parser.add_argument('--free_only', required=False, action='store_true')
     parser.add_argument('--download', required=False, action='store_true')
+    parser.add_argument('--dl_idx', required=False, type=int, default=0)
     parser.add_argument('--category', required=False, type=str)
     parser.add_argument('--forum', required=False, type=str)
     args = parser.parse_args()
@@ -314,7 +315,7 @@ def main():
         utils.print_stats(args.category)
 
     if args.download:
-        utils.download_torrents(args.category, args.forum, args.free_only)
+        utils.download_torrents(args.category, args.forum, args.free_only, args.dl_idx)
 
 
 if __name__ == '__main__':
