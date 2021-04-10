@@ -4,25 +4,23 @@ from subprocess import getstatusoutput
 
 from commons import *
 
-EXEC = 'D:\\_dl_tools_\\crunchy-dl-nx\\crunchy.exe'
-
 
 class CrunchyDL:
 
     def __init__(self, work_dir=WORK_DIR, history=None):
         self.work_dir = work_dir
-        self.history = history if history else History(file_name='crunchy_dl.json')
+        self.exec = join(work_dir, 'crunchy.exe')
+        self.history = history if history else History(work_dir=work_dir, file_name='crunchy_dl.json')
 
     def _autorize(self):
         auth = self.history.get_category('auth')
-        _, res = getstatusoutput(f'{EXEC} --auth --user {auth["user"]} --pass {auth["pass"]}')
+        _, res = getstatusoutput(f'{self.exec} --auth --user {auth["user"]} --pass {auth["pass"]}')
         print(f'Auth result: {_} - {res}')
 
-    @staticmethod
-    def _dl_episode(item):
+    def _dl_episode(self, item):
         print(f'{"=" * 40}')
         print(f'Downloading {item["ep"]} ep. of "{item["title"]}"')
-        cmd = f'{EXEC} --s {item["id"]} -e {item["ep"]} --dlsubs ruRU {"--skipdl" if item["skipdl"] else ""}'
+        cmd = f'{self.exec} --s {item["id"]} -e {item["ep"]} --dlsubs ruRU {"--skipdl" if item["skipdl"] else ""}'
         _, res = getstatusoutput(cmd)
         print(f'Download result:\n{res}')
         return 'Subtitle downloaded' in res
@@ -40,10 +38,10 @@ class CrunchyDL:
 
     def search(self, title):
         self._autorize()
-        _, res = getstatusoutput(f'{EXEC} --search "{title}"')
+        _, res = getstatusoutput(f'{self.exec} --search "{title}"')
         print(f'{res}')
         print(f'{"=" * 40}')
-        _, res = getstatusoutput(f'{EXEC} --search2 "{title}"')
+        _, res = getstatusoutput(f'{self.exec} --search2 "{title}"')
         print(f'{res}')
 
 
@@ -58,7 +56,7 @@ def args_parse():
 
 def main():
     args = args_parse()
-    crunchyDl = CrunchyDL()
+    crunchyDl = CrunchyDL(args.work_dir)
 
     if args.title == 'download':
         crunchyDl.download_titles()
