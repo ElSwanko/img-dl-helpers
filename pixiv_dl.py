@@ -34,6 +34,8 @@ class Pixiv:
         resp = request('GET', self.HEADERS['Referer'], cookies=self.cookies, headers=self.HEADERS)
         if resp.status_code == 200:
             return bs(resp.text, features='html.parser')
+        else:
+            print('Post %s not found' % post_id)
 
     @staticmethod
     def _get_meta(page):
@@ -62,7 +64,9 @@ class Pixiv:
         return list(filter(lambda t: t, [self._get_tag(tag) for tag in post['tags']['tags']]))
 
     def _download_post(self, posts_dir, post_id, post=None):
-        if not post: post = self._get_meta(self._get_page(post_id))['illust'][post_id]
+        page = self._get_page(post_id)
+        if page is None: return True
+        if not post: post = self._get_meta(page)['illust'][post_id]
         links, ext = self._gen_urls(post['urls']['original'], post['userIllusts'][post_id]['pageCount'])
         tags = self._get_tags(post)
         self.HEADERS['Referer'] = self.POST_URL % post_id
@@ -85,6 +89,7 @@ class Pixiv:
 
     def download_posts(self, post_id, load_all=False):
         page = self._get_page(post_id)
+        if page is None: return
         post = self._get_meta(page)['illust'][post_id]
 
         posts_ = self.history.get_item('posts', post['userId'], [])

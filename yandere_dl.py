@@ -25,7 +25,7 @@ class Yanderer:
             self.cookies = load(f)
 
     def _get_page(self, page_url, params=None):
-        resp = request('GET', page_url, params=params, cookies=self.cookies)
+        resp = request('GET', page_url, params=params, cookies=self.cookies, proxies=PROXIES)
         return bs(resp.text, features='html.parser')
 
     def _get_last_page(self, page):
@@ -131,7 +131,8 @@ class Pooler(Yanderer):
         }}
 
     def _get_image_tags_page(self, page=1):
-        resp = request('GET', (self.POOL_URL + '?page=%d' % page) % ('show', self.pool_id), cookies=self.cookies)
+        resp = request('GET', (self.POOL_URL + '?page=%d' % page) % ('show', self.pool_id),
+                       cookies=self.cookies, proxies=PROXIES)
         if resp.status_code != 200: return [], True
         page = bs(resp.text, features='html.parser')
         links = page.find_all('a', class_='thumb')
@@ -154,13 +155,13 @@ class Pooler(Yanderer):
 
     def _dl_archive(self):
         print('Pool[%10d] Downloading archive: %s' % (self.pool_id, self.pool_name))
-        resp = request('GET', self.POOL_URL % ('zip', self.pool_id),
-                       params={'png': 1}, cookies=self.cookies, stream=True)
+        resp = request('GET', self.POOL_URL % ('zip', self.pool_id),params={'png': 1},
+                       cookies=self.cookies, stream=True, proxies=PROXIES)
         if resp.status_code == 200:
             print('Pool[%10d] Found PNG archive' % self.pool_id)
         else:
-            resp = request('GET', self.POOL_URL % ('zip', self.pool_id),
-                           params={'jpeg': 1}, cookies=self.cookies, stream=True)
+            resp = request('GET', self.POOL_URL % ('zip', self.pool_id), params={'jpeg': 1},
+                           cookies=self.cookies, stream=True, proxies=PROXIES)
             if resp.status_code == 200:
                 print('Pool[%10d] Found JPG archive' % self.pool_id)
             else:
@@ -303,12 +304,12 @@ class Poster(Yanderer):
 
     def _download_post(self, post_id, post):
         if post.get('png'):
-            resp = request('GET', post['png']['url'], cookies=self.cookies)
+            resp = request('GET', post['png']['url'], cookies=self.cookies, proxies=PROXIES)
             if resp.status_code == 200:
                 print('Post[%10d] Found PNG post' % post_id)
                 return dl_file(resp, self.post_dir, post['png']['file'], post_id)
         else:
-            resp = request('GET', post['raw']['url'], cookies=self.cookies)
+            resp = request('GET', post['raw']['url'], cookies=self.cookies, proxies=PROXIES)
             if resp.status_code == 200:
                 return dl_file(resp, self.post_dir, post['raw']['file'], post_id)
 
@@ -336,7 +337,7 @@ def rename_posts(work_dir=WORK_DIR, file_list='yandere.rename.txt'):
         files = [line[:-1] for line in f.readlines()[1:]]
     for file in files:
         path = split(file)
-        found = findall(r'yande\.re (\d+) (.+?)\.(\w{3,4})', path[1])
+        found = findall(r'^yande\.re (\d+) (.+?)\.(\w{3,4})$', path[1])
         if not found: continue
         post_id, tags, ext = found[0]
         rename(join(path[0], file), join(path[0], '%s %s.%s' % (post_id, tagger.filter_tags(tags), ext)))

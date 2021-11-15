@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser
-from subprocess import getstatusoutput
+from subprocess import getstatusoutput, check_output
 
 from commons import *
 
@@ -20,8 +20,11 @@ class CrunchyDL:
     def _dl_episode(self, item):
         print(f'{"=" * 40}')
         print(f'Downloading {item["ep"]} ep. of "{item["title"]}"')
-        cmd = f'{self.exec} --s {item["id"]} -e {item["ep"]} --dlsubs ruRU {"--skipdl" if item["skipdl"] else ""}'
-        _, res = getstatusoutput(cmd)
+        # cmd = f'{self.exec} --s {item["id"]} -e {item["ep"]} --dlsubs ru {"--skipdl" if item["skipdl"] else ""}'
+        cmd = [self.exec, '--s', str(item["id"]), '-e', str(item["ep"]), '--dlsubs', 'ru']
+        if item['skipdl']: cmd.append('--skipdl')
+        print(cmd)
+        res = check_output(cmd).decode('utf-8')
         print(f'Download result:\n{res}')
         return 'Subtitle downloaded' in res
 
@@ -47,8 +50,8 @@ class CrunchyDL:
 
 def args_parse():
     parser = ArgumentParser(description='CrunchyRoll download helper')
-    parser.add_argument('--work_dir', type=str, default=WORK_DIR)
-    parser.add_argument('title', type=str, default='download')
+    parser.add_argument('--work_dir', type=str, required=False, default='D:\\MediaTools\\crunchy-dl-nx')
+    parser.add_argument('--title', type=str, required=False, default='download')
     args = parser.parse_args()
     print(args)
     return args

@@ -5,6 +5,8 @@ from os.path import join, exists, isfile, isdir, dirname, abspath
 from random import getrandbits
 from math import pow
 
+PROXIES={'http':'127.0.0.1:58304', 'https':'127.0.0.1:58304'}
+
 BASE_DIR = dirname(abspath(__file__))
 WORK_DIR = 'D:\\_downloads_'
 

@@ -14,7 +14,7 @@ class TelethonDL:
     DATE_FMT = '%Y-%m-%d_%H-%M-%S'
 
     PICS_CHAT = 'P.S.T.N.A.'
-    DANBOORU_CHANNEL = 'Danbooru Arts'
+    DANBOORU_CHANNEL = 'dnbooru'
 
     def __init__(self, work_dir=WORK_DIR, history=None):
         self.work_dir = work_dir
@@ -46,7 +46,7 @@ class TelethonDL:
 
     def _dl_danbooru_link(self, link):
         name, ext = link['url'].split('/')[-1].split('.')
-        resp = request('GET', link['url'], stream=True)
+        resp = request('GET', link['url'], stream=True, proxies=PROXIES)
         if resp.status_code == 200:
             dl_file(resp, self.work_dir, '%s %s.%s' % (' '.join(link['tags']), name[:8], ext), 0)
 
@@ -67,7 +67,7 @@ class TelethonDL:
 
     async def _dl_chat_arts(self, subj, cnt):
         last_msg = self.history.get_item(subj, 'last_msg', {'id': 0})
-        async for msg in self.client.iter_messages(self.PICS_CHAT, limit=cnt, min_id=last_msg['id']):
+        async for msg in self.client.iter_messages(subj, limit=cnt, min_id=last_msg['id']):
             if msg.photo:
                 p = await msg.download_media(file=(self._get_photo_path(msg.photo.date)))
                 print('Photo downloaded to ' + p)
@@ -82,11 +82,17 @@ class TelethonDL:
     def download_chat_arts(self, subj, cnt=50):
         with self.client: self.client.loop.run_until_complete(self._dl_chat_arts(subj, cnt))
 
+    async def send_file(self, subj, path_to_file):
+        await self.client.send_file(subj, path_to_file, caption='It works!')
+
+    def test_send_file(self, subj, path_to_file):
+        with self.client: self.client.loop.run_until_complete(self.send_file(subj, path_to_file))
 
 def main():
     teleton = TelethonDL('D:\\_downloads_\\!images!\\')
-    teleton.download_danbooru_arts(100)
-    teleton.download_chat_arts(teleton.PICS_CHAT, 100)
+    teleton.download_danbooru_arts(125)
+    # teleton.download_chat_arts(teleton.PICS_CHAT, 100)
+    # teleton.test_send_file('Вака ДХС', 'D:\\_downloads_\\VodkaSubs_Selection_Project_02_1080p_AVC_AAC_track3_rus.ass')
 
 
 if __name__ == '__main__':

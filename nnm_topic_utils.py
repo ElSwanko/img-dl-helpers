@@ -57,7 +57,7 @@ class NNMTopicUtils:
         for i in range(0, self.RETRIES):
             try:
                 resp = request(method, page_url, params=params, data=data,
-                               headers=self.HEADERS, cookies=self.cookies)
+                               headers=self.HEADERS, cookies=self.cookies, proxies=PROXIES)
                 if resp.status_code == 200: return resp
                 print('Failed to get page [%s] with params [%s]: %s' % (page_url, params, resp.text))
             except Exception as e:

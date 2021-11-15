@@ -12,7 +12,7 @@ MAIN_URL = 'https://danbooru.donmai.us'
 
 
 def _request_page(page_url):
-    resp = request('GET', page_url)
+    resp = request('GET', page_url, proxies=PROXIES)
     if resp.status_code == 200:
         return bs(resp.text, features='html.parser')
     print('Page[%10d] Not found: %s' % (0, page_url))
@@ -69,11 +69,11 @@ class Danbooru:
         return result
 
     def _download_post(self, dir_path, post_id):
-        resp = request('GET', self.POST_URL % post_id)
+        resp = request('GET', self.POST_URL % post_id, proxies=PROXIES)
         if resp.status_code == 200:
             post = _get_post_data(post_id, bs(resp.text, features='html.parser'))
             if post['url']:
-                resp = request('GET', post['url'], stream=True)
+                resp = request('GET', post['url'], stream=True, proxies=PROXIES)
                 if resp.status_code == 200:
                     return dl_file(resp, dir_path, post['file'], post_id)
 
