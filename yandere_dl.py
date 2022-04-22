@@ -386,6 +386,9 @@ def main():
         else:
             pooler.download_pool(args.pool_id)
 
+    if args.rename_pools:
+        rename_pools(args.work_dir)
+
     if args.tags:
         poster = Poster(args.work_dir)
         for tag in args.tags.split(','):
@@ -394,9 +397,6 @@ def main():
     if args.tag:
         poster = Poster(args.work_dir)
         poster.download_posts(args.tag)
-
-    if args.rename_pools:
-        rename_pools(args.work_dir)
 
     if args.rename_posts:
         rename_posts(args.work_dir, args.rename_file)

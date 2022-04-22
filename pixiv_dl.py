@@ -38,10 +38,14 @@ class Pixiv:
             print('Post %s not found' % post_id)
 
     @staticmethod
-    def _get_meta(page):
+    def _get_meta(page, post_id):
         meta = page.find_all('meta')
-        meta = loads(meta[25].attrs['content'])  # TODO Может, навернуть логику поиска нужной меты?
-        return meta
+        for m in meta:
+            if m.attrs['content'].find('{') == 0:
+                m = loads(m.attrs['content'])
+                if m.get('illust'):
+                    return m
+        print('Meta not found for post %s' % post_id)
 
     @staticmethod
     def _save_meta(meta, post_id):
@@ -66,7 +70,8 @@ class Pixiv:
     def _download_post(self, posts_dir, post_id, post=None):
         page = self._get_page(post_id)
         if page is None: return True
-        if not post: post = self._get_meta(page)['illust'][post_id]
+        if not post: post = self._get_meta(page, post_id).get('illust', {}).get(post_id)
+        if not post: return True
         links, ext = self._gen_urls(post['urls']['original'], post['userIllusts'][post_id]['pageCount'])
         tags = self._get_tags(post)
         self.HEADERS['Referer'] = self.POST_URL % post_id
@@ -90,7 +95,7 @@ class Pixiv:
     def download_posts(self, post_id, load_all=False):
         page = self._get_page(post_id)
         if page is None: return
-        post = self._get_meta(page)['illust'][post_id]
+        post = self._get_meta(page, post_id)['illust'][post_id]
 
         posts_ = self.history.get_item('posts', post['userId'], [])
         posts_dir = make_tag_dir(self.work_dir, post['userName'] + ' ' + post['userAccount'])
