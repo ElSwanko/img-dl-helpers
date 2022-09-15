@@ -9,7 +9,7 @@ class CrunchyDL:
 
     def __init__(self, work_dir=WORK_DIR, history=None):
         self.work_dir = work_dir
-        self.exec = join(work_dir, 'crunchy.exe')
+        self.exec = join(work_dir, 'crunchy-beta.exe')
         self.history = history if history else History(work_dir=work_dir, file_name='crunchy_dl.json')
 
     def _autorize(self):

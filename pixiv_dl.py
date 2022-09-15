@@ -31,7 +31,7 @@ class Pixiv:
 
     def _get_page(self, post_id):
         self.HEADERS['Referer'] = self.POST_URL % post_id
-        resp = request('GET', self.HEADERS['Referer'], cookies=self.cookies, headers=self.HEADERS)
+        resp = request('GET', self.HEADERS['Referer'], cookies=self.cookies, headers=self.HEADERS, proxies=PROXIES)
         if resp.status_code == 200:
             return bs(resp.text, features='html.parser')
         else:
@@ -86,7 +86,7 @@ class Pixiv:
                     return False
                 else:
                     link, ext = resp.json()['url'], 'gif'
-            resp = request('GET', link, cookies=self.cookies, headers=self.HEADERS)
+            resp = request('GET', link, cookies=self.cookies, headers=self.HEADERS, proxies=PROXIES)
             if resp.status_code == 200:
                 result &= dl_file(resp, posts_dir, '%s p%03d %s.%s' %
                                   (post_id, i + 1, ' '.join(cut_tags(tags)), ext), int(post_id))
