@@ -10,7 +10,7 @@ from commons import *
 
 
 class NNMTopicUtils:
-    ORIGIN = 'nnmclub.to'
+    ORIGIN = 'ipv6.nnmclub.to'
     URL = 'https://%s/forum/' % ORIGIN
 
     LOGIN = 'login.php'
