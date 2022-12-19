@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from argparse import ArgumentParser
 from re import findall
+
+from brotli import decompress
 from time import sleep
 
 from bs4 import BeautifulSoup as bs
@@ -10,7 +12,7 @@ from commons import *
 
 
 class NNMTopicUtils:
-    ORIGIN = 'ipv6.nnmclub.to'
+    ORIGIN = 'nnmclub.to'
     URL = 'https://%s/forum/' % ORIGIN
 
     LOGIN = 'login.php'
@@ -64,9 +66,14 @@ class NNMTopicUtils:
                 print('Failed to get page [%s] with params [%s]: %s' % (page_url, params, e))
             sleep(self.RETRY_TIMEOUT * (i + 1))
 
+    @staticmethod
+    def _decompress(resp):
+        if resp: return decompress(resp.content) if resp.headers.get('content-encoding') == 'br' else resp.text
+
     def _get_page(self, page_url, referer, params=None, data=None, method='GET'):
         resp = self._request(page_url, referer, params, data, method)
-        return bs(resp.text, features='html.parser') if resp else None
+        text = self._decompress(resp)
+        return bs(text, features='html.parser') if text else None
 
     def _login(self):
         # Get login code
@@ -89,7 +96,8 @@ class NNMTopicUtils:
         if not resp: return False
         print('Login[%s] Login result: %d' % (self.user, resp.status_code))
         if resp.status_code != 200: return False
-        page = bs(resp.text, features='html.parser')
+        text = self._decompress(resp)
+        page = bs(text, features='html.parser')
         me = page.findAll('a', class_='mainmenu')[12].text[8:-2]
         if not me:
             print('Failed to login')
