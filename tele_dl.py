@@ -36,9 +36,9 @@ class TelethonDL:
             m = match(r'^(?:Worlds?:(?P<W>.*?))?(?:Characters?:(?P<C>.*?))?(?:Artists?:(?P<A>.*?))?$',
                       msg.text.replace('\n', ' ').replace('#', ''))
             if m:
-                if m.group('A'): tags.append(m.group('A').strip())
-                if m.group('C'): tags.append(m.group('C').strip())
-                if m.group('W'): tags.append(m.group('W').strip())
+                if m.group('A'): tags += m.group('A').strip().split(' ')
+                if m.group('C'): tags += m.group('C').strip().split(' ')
+                if m.group('W'): tags += m.group('W').strip().split(' ')
             links.append({'url': msg.reply_markup.rows[0].buttons[0].url, 'tags': cut_tags(tags)})
             # await msg.mark_read()
         self.history.save()
